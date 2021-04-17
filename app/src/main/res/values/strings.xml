@@ -2,5 +2,8 @@
     <string name="app_name">Sport Tracker</string>
     <string name="title_home">Home</string>
     <string name="title_track">Track</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_scheduler">Schedule</string>
+    <string name="start">Start</string>
+    <string name="finish_run">Finish</string>
+    <string name="init_timer">00:00:00:00</string>
 </resources>

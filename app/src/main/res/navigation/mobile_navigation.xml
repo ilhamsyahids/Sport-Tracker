@@ -3,23 +3,35 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_home">
+    app:startDestination="@+id/nav_home">
 
     <fragment
-        android:id="@+id/navigation_home"
+        android:id="@+id/nav_home"
         android:name="com.myandroid.sporttracker.ui.home.HomeFragment"
         android:label="@string/title_home"
         tools:layout="@layout/fragment_home" />
 
     <fragment
-        android:id="@+id/navigation_dashboard"
+        android:id="@+id/nav_track"
         android:name="com.myandroid.sporttracker.ui.track.TrackFragment"
         android:label="@string/title_track"
-        tools:layout="@layout/fragment_track" />
+        tools:layout="@layout/fragment_track" >
+        <action
+            android:id="@+id/action_nav_track_to_trackingFragment"
+            app:destination="@id/trackingFragment" />
+    </fragment>
 
     <fragment
-        android:id="@+id/navigation_notifications"
+        android:id="@+id/nav_scheduler"
         android:name="com.myandroid.sporttracker.ui.notifications.NotificationsFragment"
-        android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications" />
+        android:label="@string/title_scheduler"
+        tools:layout="@layout/fragment_scheduler" />
+    <fragment
+        android:id="@+id/trackingFragment"
+        android:name="com.myandroid.sporttracker.ui.tracking.TrackingFragment"
+        android:label="TrackingFragment" >
+        <action
+            android:id="@+id/action_trackingFragment_to_nav_track"
+            app:destination="@id/nav_track" />
+    </fragment>
 </navigation>
