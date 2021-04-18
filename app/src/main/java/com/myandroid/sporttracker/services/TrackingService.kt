@@ -46,7 +46,7 @@ typealias PolyLines = MutableList<PolyLine>
 class TrackingService: LifecycleService() {
 
     companion object {
-        val isTracking = MutableLiveData<Boolean>()
+        val isTracking = MutableLiveData<Int>()
         val pathPoints = MutableLiveData<PolyLines>()
 
         val timeRunInMillis = MutableLiveData<Long>()
@@ -59,9 +59,10 @@ class TrackingService: LifecycleService() {
     @Inject
     lateinit var baseNotificationBuilder: NotificationCompat.Builder
 
-    lateinit var currNotificationBuilder: NotificationCompat.Builder
+    private lateinit var currNotificationBuilder: NotificationCompat.Builder
 
     private var isFirstRun = true
+    private var killedService = false
 
     private var isTimerEnabled = false
     private var lapTime = 0L
@@ -76,13 +77,13 @@ class TrackingService: LifecycleService() {
         fusedLocationProviderClient = FusedLocationProviderClient(this)
 
         isTracking.observe(this, {
-            updateLocationTracking(it)
-            updateNotificationTrackingState(it)
+            updateLocationTracking(it == 1)
+            updateNotificationTrackingState(it == 1)
         })
     }
 
     private fun initialValues() {
-        isTracking.postValue(false)
+        isTracking.postValue(-1)
         pathPoints.postValue(mutableListOf())
         timeRunInSeconds.postValue(0L)
         timeRunInMillis.postValue(0L)
@@ -107,6 +108,7 @@ class TrackingService: LifecycleService() {
                 }
                 TRACKING_ACTION_STOP_SERVICE -> {
                     Log.d("TrackingService", "Stop service")
+                    killService()
                 }
                 else -> {
                     Log.d("TrackingService", "Else service")
@@ -118,7 +120,7 @@ class TrackingService: LifecycleService() {
 
     private fun startServiceForeground() {
         startTimer()
-        isTracking.postValue(true)
+        isTracking.postValue(1)
 
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -130,20 +132,30 @@ class TrackingService: LifecycleService() {
 
 
         timeRunInSeconds.observe(this, {
-            val notif = currNotificationBuilder
-                .setContentText(TrackingUtil.getFormattedStopWatchTime(it * 1000L))
-
-            notificationManager.notify(NOTIFICATION_TRACKING_SERVICE_ID, notif.build())
+            if (!killedService) {
+                val notif = currNotificationBuilder
+                    .setContentText(TrackingUtil.getFormattedStopWatchTime(it * 1000L))
+                notificationManager.notify(NOTIFICATION_TRACKING_SERVICE_ID, notif.build())
+            }
         })
+    }
+
+    private fun killService() {
+        killedService = true
+        isFirstRun = true
+        pauseService()
+        initialValues()
+        stopForeground(true)
+        stopSelf()
     }
 
     private fun startTimer() {
         addEmptyPolyline()
-        isTracking.postValue(true)
+        isTracking.postValue(1)
         timeStarted = System.currentTimeMillis()
         isTimerEnabled = true
         CoroutineScope(Dispatchers.Main).launch {
-            while(isTracking.value!!) {
+            while(isTracking.value!! == 1) {
                 // time diff between now and time started
                 lapTime = System.currentTimeMillis() - timeStarted
 
@@ -160,7 +172,7 @@ class TrackingService: LifecycleService() {
     }
 
     private fun pauseService() {
-        isTracking.postValue(false)
+        isTracking.postValue(0)
         isTimerEnabled = false
     }
 
@@ -192,7 +204,7 @@ class TrackingService: LifecycleService() {
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(p0: LocationResult?) {
             super.onLocationResult(p0)
-            if (isTracking.value!!) {
+            if (isTracking.value!! == 1) {
                 p0?.locations?.let { locations ->
                     for (location in locations) {
                         addPathPoint(location)
@@ -244,17 +256,10 @@ class TrackingService: LifecycleService() {
             isAccessible = true
             set(currNotificationBuilder, ArrayList<NotificationCompat.Action>())
         }
-        currNotificationBuilder = baseNotificationBuilder
-            .addAction(R.drawable.ic_pause_black_24dp, notificationActionText, pendingIntent)
-        notificationManager.notify(NOTIFICATION_TRACKING_SERVICE_ID, currNotificationBuilder.build())
+        if (!killedService) {
+            currNotificationBuilder = baseNotificationBuilder
+                .addAction(R.drawable.ic_pause_black_24dp, notificationActionText, pendingIntent)
+            notificationManager.notify(NOTIFICATION_TRACKING_SERVICE_ID, currNotificationBuilder.build())
+        }
     }
-
-    private fun setIntentToMainActivity() = PendingIntent.getActivity(
-        this,
-        0,
-        Intent(this, MainActivity::class.java).also {
-            it.action = TRACKING_ACTION_SHOW_TRACKING_FRAGMENT
-        },
-        FLAG_UPDATE_CURRENT
-    )
 }

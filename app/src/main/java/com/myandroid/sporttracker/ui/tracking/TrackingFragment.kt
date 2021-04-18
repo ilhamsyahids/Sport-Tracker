@@ -4,18 +4,19 @@ import android.content.Intent
 import android.graphics.Color
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
+import android.util.Log
+import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.myandroid.sporttracker.R
 import com.myandroid.sporttracker.services.PolyLine
 import com.myandroid.sporttracker.services.TrackingService
 import com.myandroid.sporttracker.util.Constant.TRACKING_ACTION_PAUSE_SERVICE
 import com.myandroid.sporttracker.util.Constant.TRACKING_ACTION_START_OR_RESUME_SERVICE
+import com.myandroid.sporttracker.util.Constant.TRACKING_ACTION_STOP_SERVICE
 import com.myandroid.sporttracker.util.TrackingUtil
 import kotlinx.android.synthetic.main.fragment_tracking.*
 
@@ -31,11 +32,16 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
 
     private var isTracking = false
     private var pathPoints = mutableListOf<PolyLine>()
+    private var currentTimeInMillis = 0L
+
+    private var menu: Menu? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        setHasOptionsMenu(true)
+
         return inflater.inflate(R.layout.fragment_tracking, container, false)
     }
 
@@ -59,6 +65,28 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
         subscribeToObservers()
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.top_tracking_menu, menu)
+        this.menu = menu
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        super.onPrepareOptionsMenu(menu)
+        if (currentTimeInMillis > 0L) {
+            this.menu?.getItem(0)?.isVisible = true
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId) {
+            R.id.cancel_tracking -> {
+                showCancelTrackDialog()
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
     private fun sendCommandToTrackingService(action: String) = Intent(requireContext(), TrackingService::class.java).also {
         it.action = action
         requireContext().startService(it)
@@ -72,7 +100,8 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
 
     private fun subscribeToObservers() {
         TrackingService.isTracking.observe(viewLifecycleOwner, {
-            updateBtnTracking(it)
+            Log.d("isTracking.observe", it.toString())
+            if (it != -1) updateBtnTracking(it == 1)
         })
 
         TrackingService.pathPoints.observe(viewLifecycleOwner, {
@@ -81,27 +110,35 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
             moveCameraToUser()
         })
 
-        TrackingService.timeRunInMillis.observe(viewLifecycleOwner, Observer {
-            val formatted = TrackingUtil.getFormattedStopWatchTime(it, true)
+        TrackingService.timeRunInMillis.observe(viewLifecycleOwner, {
+            currentTimeInMillis = it
+            val formatted = TrackingUtil.getFormattedStopWatchTime(currentTimeInMillis, true)
             tvTimer.text = formatted
         })
     }
 
     private fun toggleTracking() {
         if (isTracking) {
+            menu?.getItem(0)?.isVisible = true
             sendCommandToTrackingService(TRACKING_ACTION_PAUSE_SERVICE)
         } else {
             sendCommandToTrackingService(TRACKING_ACTION_START_OR_RESUME_SERVICE)
         }
     }
 
+    private fun resetBtnTracking() {
+        btnToggleTracking.setText(R.string.start)
+        btnFinishRun.visibility = View.GONE
+    }
+
     private fun updateBtnTracking(isTracking: Boolean) {
         this.isTracking = isTracking
         if (!isTracking) {
-            btnToggleTracking.text = "Resume"
+            btnToggleTracking.setText(R.string.resume)
             btnFinishRun.visibility = View.VISIBLE
         } else {
-            btnToggleTracking.text = "Stop"
+            btnToggleTracking.setText(R.string.stop)
+            menu?.getItem(0)?.isVisible = true
             btnFinishRun.visibility = View.GONE
         }
     }
@@ -138,6 +175,26 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
                 .addAll(polyline)
             mMap?.addPolyline(polylineOptions)
         }
+    }
+
+    private fun showCancelTrackDialog() {
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Cancel The Run?")
+            .setMessage("Are you sure to cancel the current run and delete all its data?")
+            .setPositiveButton("Yes") { _, _ ->
+                stopRun()
+            }
+            .setNegativeButton("No") { dialogInterface, _ ->
+                dialogInterface.cancel()
+            }
+            .create()
+        dialog.show()
+    }
+
+    private fun stopRun() {
+        sendCommandToTrackingService(TRACKING_ACTION_PAUSE_SERVICE)
+        sendCommandToTrackingService(TRACKING_ACTION_STOP_SERVICE)
+        findNavController().navigate(R.id.action_trackingFragment_to_nav_track)
     }
 
     override fun onResume() {
