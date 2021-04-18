@@ -1,5 +1,6 @@
 package com.myandroid.sporttracker.ui.tracking
 
+import android.content.Intent
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -10,6 +11,8 @@ import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.myandroid.sporttracker.R
+import com.myandroid.sporttracker.services.TrackingService
+import com.myandroid.sporttracker.util.Constant.TRACKING_ACTION_START_OR_RESUME_SERVICE
 import kotlinx.android.synthetic.main.fragment_tracking.*
 
 class TrackingFragment : Fragment(), OnMapReadyCallback {
@@ -41,6 +44,15 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
         mapView.onCreate(savedInstanceState)
 
         mapView.getMapAsync(this)
+
+        btnStart.setOnClickListener {
+            sendCommandToTrackingService(TRACKING_ACTION_START_OR_RESUME_SERVICE)
+        }
+    }
+
+    private fun sendCommandToTrackingService(action: String) = Intent(requireContext(), TrackingService::class.java).also {
+        it.action = action
+        requireContext().startService(it)
     }
 
     override fun onMapReady(googleMap: GoogleMap) {

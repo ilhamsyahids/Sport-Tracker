@@ -44,7 +44,7 @@ class TrackFragment : Fragment(), EasyPermissions.PermissionCallbacks {
 
 
         val calendarView = root.findViewById<CalendarView>(R.id.calendarView)
-        calendarView?.setOnDateChangeListener { view, year, month, dayOfMonth ->
+        calendarView?.setOnDateChangeListener { _, year, month, dayOfMonth ->
             // Note that months are indexed from 0. So, 0 means January, 1 means february, 2 means march etc.
             val msg = "Selected date is " + dayOfMonth + "/" + (month + 1) + "/" + year
             Toast.makeText(this.context, msg, Toast.LENGTH_SHORT).show()
@@ -59,13 +59,13 @@ class TrackFragment : Fragment(), EasyPermissions.PermissionCallbacks {
 
         val myDate = "$year/$month/$daysInMonth 23:59:59"
         val sdf = SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
-        val date: Date = sdf.parse(myDate)
+        val date: Date = sdf.parse(myDate)!!
         val millis = date.time
 
         val yearBefore = year - 1
         val myDate1 = "$yearBefore/$month/$day 00:00:00"
         val sdf1 = SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
-        val date1: Date = sdf1.parse(myDate1)
+        val date1: Date = sdf1.parse(myDate1)!!
         val millis1 = date1.time
 
         calendarView?.setMinDate(millis1)
