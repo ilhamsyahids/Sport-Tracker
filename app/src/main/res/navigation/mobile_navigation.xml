@@ -5,6 +5,10 @@
     android:id="@+id/mobile_navigation"
     app:startDestination="@+id/nav_home">
 
+    <action android:id="@+id/action_main_trackingFragment"
+        app:destination="@id/trackingFragment"
+        app:launchSingleTop="true" />
+
     <fragment
         android:id="@+id/nav_home"
         android:name="com.myandroid.sporttracker.ui.home.HomeFragment"
