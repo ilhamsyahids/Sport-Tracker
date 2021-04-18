@@ -32,14 +32,17 @@ import com.myandroid.sporttracker.util.Constant.TRACKING_ACTION_SHOW_TRACKING_FR
 import com.myandroid.sporttracker.util.Constant.TRACKING_ACTION_START_OR_RESUME_SERVICE
 import com.myandroid.sporttracker.util.Constant.TRACKING_ACTION_STOP_SERVICE
 import com.myandroid.sporttracker.util.TrackingUtil
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 typealias PolyLine = MutableList<LatLng>
 typealias PolyLines = MutableList<PolyLine>
 
+@AndroidEntryPoint
 class TrackingService: LifecycleService() {
 
     companion object {
@@ -50,7 +53,13 @@ class TrackingService: LifecycleService() {
         val timeRunInSeconds = MutableLiveData<Long>()
     }
 
-    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    @Inject
+    lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+
+    @Inject
+    lateinit var baseNotificationBuilder: NotificationCompat.Builder
+
+    lateinit var currNotificationBuilder: NotificationCompat.Builder
 
     private var isFirstRun = true
 
@@ -63,10 +72,12 @@ class TrackingService: LifecycleService() {
     override fun onCreate() {
         super.onCreate()
         initialValues()
+        currNotificationBuilder = baseNotificationBuilder
         fusedLocationProviderClient = FusedLocationProviderClient(this)
 
         isTracking.observe(this, {
             updateLocationTracking(it)
+            updateNotificationTrackingState(it)
         })
     }
 
@@ -115,15 +126,15 @@ class TrackingService: LifecycleService() {
             createNotificationChannel(notificationManager)
         }
 
-        val notificationBuilder = NotificationCompat.Builder(this, NOTIFICATION_TRACKING_SERVICE_CHANNEL_ID)
-            .setAutoCancel(false)
-            .setOngoing(true)
-            .setSmallIcon(R.drawable.ic_run)
-            .setContentTitle("Sport Tracker")
-            .setContentText("00:00:00")
-            .setContentIntent(setIntentToMainActivity())
+        startForeground(NOTIFICATION_TRACKING_SERVICE_ID, baseNotificationBuilder.build())
 
-        startForeground(NOTIFICATION_TRACKING_SERVICE_ID, notificationBuilder.build())
+
+        timeRunInSeconds.observe(this, {
+            val notif = currNotificationBuilder
+                .setContentText(TrackingUtil.getFormattedStopWatchTime(it * 1000L))
+
+            notificationManager.notify(NOTIFICATION_TRACKING_SERVICE_ID, notif.build())
+        })
     }
 
     private fun startTimer() {
@@ -211,6 +222,31 @@ class TrackingService: LifecycleService() {
         )
 
         notificationManager.createNotificationChannel(channel)
+    }
+
+    private fun updateNotificationTrackingState(isTracking: Boolean) {
+        val notificationActionText = if (isTracking) "Pause" else "Resume"
+        val pendingIntent = if (isTracking) {
+            val pauseIntent = Intent(this, TrackingService::class.java).apply {
+                action = TRACKING_ACTION_PAUSE_SERVICE
+            }
+            PendingIntent.getService(this, 1, pauseIntent, FLAG_UPDATE_CURRENT)
+        } else {
+            val resumeIntent = Intent(this, TrackingService::class.java).apply {
+                action = TRACKING_ACTION_START_OR_RESUME_SERVICE
+            }
+            PendingIntent.getService(this, 2, resumeIntent, FLAG_UPDATE_CURRENT)
+        }
+
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        currNotificationBuilder.javaClass.getDeclaredField("mActions").apply {
+            isAccessible = true
+            set(currNotificationBuilder, ArrayList<NotificationCompat.Action>())
+        }
+        currNotificationBuilder = baseNotificationBuilder
+            .addAction(R.drawable.ic_pause_black_24dp, notificationActionText, pendingIntent)
+        notificationManager.notify(NOTIFICATION_TRACKING_SERVICE_ID, currNotificationBuilder.build())
     }
 
     private fun setIntentToMainActivity() = PendingIntent.getActivity(
