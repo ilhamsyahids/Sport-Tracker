@@ -7,11 +7,11 @@ import androidx.room.*
 interface SportDAO {
 
     @Query("SELECT * FROM sport_table ORDER BY timestamp DESC")
-    fun getAllTrackByDate(): LiveData<List<Sport>>
+    fun getAllSportByDate(): LiveData<List<Sport>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTrack(sport: Sport)
+    suspend fun insertSport(sport: Sport)
 
     @Delete
-    suspend fun deleteTrack(sport: Sport)
+    suspend fun deleteSport(sport: Sport)
 }
