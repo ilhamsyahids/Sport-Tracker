@@ -2,31 +2,38 @@ package com.myandroid.sporttracker.ui.tracking
 
 import android.content.Intent
 import android.graphics.Color
-import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.maps.*
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.myandroid.sporttracker.R
+import com.myandroid.sporttracker.db.Sport
+import com.myandroid.sporttracker.db.SportType
 import com.myandroid.sporttracker.services.PolyLine
 import com.myandroid.sporttracker.services.TrackingService
 import com.myandroid.sporttracker.util.Constant.TRACKING_ACTION_PAUSE_SERVICE
 import com.myandroid.sporttracker.util.Constant.TRACKING_ACTION_START_OR_RESUME_SERVICE
 import com.myandroid.sporttracker.util.Constant.TRACKING_ACTION_STOP_SERVICE
 import com.myandroid.sporttracker.util.TrackingUtil
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_tracking.*
+import java.util.*
 
+@AndroidEntryPoint
 class TrackingFragment : Fragment(), OnMapReadyCallback {
 
     companion object {
         fun newInstance() = TrackingFragment()
     }
 
-    private lateinit var viewModel: TrackingViewModel
+    private val viewModel: TrackingViewModel by viewModels()
 
     private var mMap: GoogleMap? = null
 
@@ -45,12 +52,6 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
         return inflater.inflate(R.layout.fragment_tracking, container, false)
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProvider(this).get(TrackingViewModel::class.java)
-        // TODO: Use the ViewModel
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -61,9 +62,54 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
         btnToggleTracking.setOnClickListener {
             toggleTracking()
         }
+        
+        btnFinishTrack.setOnClickListener {
+            viewAllTrack()
+            finishTrackAndSaveToDb()
+        }
 
         subscribeToObservers()
     }
+
+    private fun viewAllTrack() {
+        if (pathPoints.isNotEmpty()) {
+            val bounds = LatLngBounds.Builder()
+            for (pl in pathPoints) {
+                for (pos in pl) {
+                    bounds.include(pos)
+                }
+            }
+
+            mMap?.moveCamera(
+                    CameraUpdateFactory.newLatLngBounds(
+                            bounds.build(),
+                            mapView.width,
+                            mapView.height,
+                            (mapView.height * 0.1f).toInt()
+                    )
+            )
+        }
+    }
+
+    private fun finishTrackAndSaveToDb() {
+        mMap?.snapshot { bmp ->
+            var distanceInMeters = 0
+            for (polyline in pathPoints) {
+                distanceInMeters += TrackingUtil.calcPolylineLength(polyline).toInt()
+            }
+            val dateTimestamp = Calendar.getInstance().timeInMillis
+            val sport = Sport(bmp, dateTimestamp, distanceInMeters, currentTimeInMillis, SportType.CYCLING)
+
+            viewModel.insertSport(sport)
+            Toast.makeText(
+                    this.context,
+                    "Saved successfully",
+                    Toast.LENGTH_LONG)
+                    .show()
+            stopTrack()
+        }
+    }
+
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
@@ -126,20 +172,15 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    private fun resetBtnTracking() {
-        btnToggleTracking.setText(R.string.start)
-        btnFinishRun.visibility = View.GONE
-    }
-
     private fun updateBtnTracking(isTracking: Boolean) {
         this.isTracking = isTracking
         if (!isTracking) {
             btnToggleTracking.setText(R.string.resume)
-            btnFinishRun.visibility = View.VISIBLE
+            btnFinishTrack.visibility = View.VISIBLE
         } else {
             btnToggleTracking.setText(R.string.stop)
             menu?.getItem(0)?.isVisible = true
-            btnFinishRun.visibility = View.GONE
+            btnFinishTrack.visibility = View.GONE
         }
     }
 
@@ -182,7 +223,7 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
             .setTitle("Cancel The Run?")
             .setMessage("Are you sure to cancel the current run and delete all its data?")
             .setPositiveButton("Yes") { _, _ ->
-                stopRun()
+                stopTrack()
             }
             .setNegativeButton("No") { dialogInterface, _ ->
                 dialogInterface.cancel()
@@ -191,7 +232,7 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
         dialog.show()
     }
 
-    private fun stopRun() {
+    private fun stopTrack() {
         sendCommandToTrackingService(TRACKING_ACTION_PAUSE_SERVICE)
         sendCommandToTrackingService(TRACKING_ACTION_STOP_SERVICE)
         findNavController().navigate(R.id.action_trackingFragment_to_nav_track)
