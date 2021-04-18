@@ -24,6 +24,7 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.maps.model.LatLng
 import com.myandroid.sporttracker.MainActivity
 import com.myandroid.sporttracker.R
+import com.myandroid.sporttracker.db.SportType
 import com.myandroid.sporttracker.util.Constant.NOTIFICATION_TRACKING_SERVICE_CHANNEL_ID
 import com.myandroid.sporttracker.util.Constant.NOTIFICATION_TRACKING_SERVICE_CHANNEL_NAME
 import com.myandroid.sporttracker.util.Constant.NOTIFICATION_TRACKING_SERVICE_ID
@@ -48,6 +49,8 @@ class TrackingService: LifecycleService() {
     companion object {
         val isTracking = MutableLiveData<Int>()
         val pathPoints = MutableLiveData<PolyLines>()
+
+        val sportType = MutableLiveData<SportType>()
 
         val timeRunInMillis = MutableLiveData<Long>()
         val timeRunInSeconds = MutableLiveData<Long>()
@@ -154,6 +157,10 @@ class TrackingService: LifecycleService() {
         isTracking.postValue(1)
         timeStarted = System.currentTimeMillis()
         isTimerEnabled = true
+
+        if (sportType.value == SportType.RUNNING) {
+            Log.d("SENSOR", "Start and resume sensor step")
+        }
         CoroutineScope(Dispatchers.Main).launch {
             while(isTracking.value!! == 1) {
                 // time diff between now and time started
@@ -174,6 +181,13 @@ class TrackingService: LifecycleService() {
     private fun pauseService() {
         isTracking.postValue(0)
         isTimerEnabled = false
+
+        Log.d("Service Sport Type", sportType.value.toString())
+
+        if (sportType.value == SportType.RUNNING) {
+            Log.d("Service Sport Type", "TODO")
+            Log.d("SENSOR", "Pause sensor step")
+        }
     }
 
     private fun addEmptyPolyline() = pathPoints.value?.apply {

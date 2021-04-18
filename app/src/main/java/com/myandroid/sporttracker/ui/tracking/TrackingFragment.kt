@@ -62,11 +62,20 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
 
         mapView.getMapAsync(this)
 
-        sportOptions.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        sportOptions?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                Log.d("POSITION", position.toString())
                 when(position) {
-                    0 -> sportType = SportType.CYCLING
-                    1 -> sportType = SportType.RUNNING
+                    0 -> {
+                        if (!isStart) {
+                            TrackingService.sportType.postValue(SportType.CYCLING)
+                        }
+                    }
+                    1 -> {
+                        if (!isStart) {
+                            TrackingService.sportType.postValue(SportType.RUNNING)
+                        }
+                    }
                 }
             }
 
@@ -116,8 +125,10 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
             val dateTimestamp = Calendar.getInstance().timeInMillis
 
             var step: Int? = null
+            Log.d("SPORTTYPE", sportType.toString())
             if (sportType == SportType.RUNNING) {
-                // get data from sensor Step
+                Log.d("SportType", "RUNNING")
+                Log.d("SENSOR", "Get data from sensor Step")
                 step = 0
             }
 
@@ -184,10 +195,26 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
             tvTimer.text = formatted
             if (!isStart && currentTimeInMillis > 0L) {
                 isStart = true
-                sportOptions.isEnabled = false
-                sportOptions.isClickable = false
+                sportOptions?.isEnabled = false
+                sportOptions?.isClickable = false
             }
         })
+
+        TrackingService.sportType.observe(viewLifecycleOwner, {
+            Log.d("POSITION SUBS", it.name)
+
+            when (it) {
+                SportType.CYCLING -> {
+                    sportOptions?.setSelection(0)
+                    sportType = SportType.CYCLING
+                }
+                SportType.RUNNING -> {
+                    sportOptions?.setSelection(1)
+                    sportType = SportType.RUNNING
+                }
+            }
+        })
+
     }
 
     private fun toggleTracking() {
@@ -195,12 +222,12 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
             menu?.getItem(0)?.isVisible = true
             sendCommandToTrackingService(TRACKING_ACTION_PAUSE_SERVICE)
             if (sportType == SportType.RUNNING) {
-                // pause sensor Step
+                Log.d("SENSOR", "Pause Sensor Step")
             }
         } else {
             sendCommandToTrackingService(TRACKING_ACTION_START_OR_RESUME_SERVICE)
             if (sportType == SportType.RUNNING) {
-                // start sensor step
+                Log.d("SENSOR", "Start Sensor Step")
             }
         }
     }
@@ -269,7 +296,8 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
         sendCommandToTrackingService(TRACKING_ACTION_PAUSE_SERVICE)
         sendCommandToTrackingService(TRACKING_ACTION_STOP_SERVICE)
         if (sportType == SportType.RUNNING) {
-            // stop sensor Step
+            Log.d("SportType", "RUNNING")
+            Log.d("SENSOR",  "Stop Sensor Step")
         }
         findNavController().navigate(R.id.action_trackingFragment_to_nav_track)
     }
