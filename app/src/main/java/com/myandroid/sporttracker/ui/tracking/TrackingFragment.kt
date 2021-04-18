@@ -16,6 +16,7 @@ import com.myandroid.sporttracker.services.PolyLine
 import com.myandroid.sporttracker.services.TrackingService
 import com.myandroid.sporttracker.util.Constant.TRACKING_ACTION_PAUSE_SERVICE
 import com.myandroid.sporttracker.util.Constant.TRACKING_ACTION_START_OR_RESUME_SERVICE
+import com.myandroid.sporttracker.util.TrackingUtil
 import kotlinx.android.synthetic.main.fragment_tracking.*
 
 class TrackingFragment : Fragment(), OnMapReadyCallback {
@@ -79,6 +80,11 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
             addLatestPolyline()
             moveCameraToUser()
         })
+
+        TrackingService.timeRunInMillis.observe(viewLifecycleOwner, Observer {
+            val formatted = TrackingUtil.getFormattedStopWatchTime(it, true)
+            tvTimer.text = formatted
+        })
     }
 
     private fun toggleTracking() {
@@ -92,7 +98,7 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
     private fun updateBtnTracking(isTracking: Boolean) {
         this.isTracking = isTracking
         if (!isTracking) {
-            btnToggleTracking.text = "Start"
+            btnToggleTracking.text = "Resume"
             btnFinishRun.visibility = View.VISIBLE
         } else {
             btnToggleTracking.text = "Stop"

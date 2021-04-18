@@ -16,7 +16,6 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -33,27 +32,40 @@ import com.myandroid.sporttracker.util.Constant.TRACKING_ACTION_SHOW_TRACKING_FR
 import com.myandroid.sporttracker.util.Constant.TRACKING_ACTION_START_OR_RESUME_SERVICE
 import com.myandroid.sporttracker.util.Constant.TRACKING_ACTION_STOP_SERVICE
 import com.myandroid.sporttracker.util.TrackingUtil
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 typealias PolyLine = MutableList<LatLng>
 typealias PolyLines = MutableList<PolyLine>
 
 class TrackingService: LifecycleService() {
 
-    var isFirstRun = true
-
     companion object {
         val isTracking = MutableLiveData<Boolean>()
         val pathPoints = MutableLiveData<PolyLines>()
+
+        val timeRunInMillis = MutableLiveData<Long>()
+        val timeRunInSeconds = MutableLiveData<Long>()
     }
 
-    lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+
+    private var isFirstRun = true
+
+    private var isTimerEnabled = false
+    private var lapTime = 0L
+    private var timeRun = 0L
+    private var timeStarted = 0L
+    private var lastSecondTimestamp = 0L
 
     override fun onCreate() {
         super.onCreate()
         initialValues()
         fusedLocationProviderClient = FusedLocationProviderClient(this)
 
-        isTracking.observe(this, Observer {
+        isTracking.observe(this, {
             updateLocationTracking(it)
         })
     }
@@ -61,6 +73,8 @@ class TrackingService: LifecycleService() {
     private fun initialValues() {
         isTracking.postValue(false)
         pathPoints.postValue(mutableListOf())
+        timeRunInSeconds.postValue(0L)
+        timeRunInMillis.postValue(0L)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -68,10 +82,13 @@ class TrackingService: LifecycleService() {
             when (it.action) {
                 TRACKING_ACTION_START_OR_RESUME_SERVICE -> {
                     if (isFirstRun) {
+                        Log.d("TrackingService", "Start service")
                         startServiceForeground()
                         isFirstRun = false
+                    } else {
+                        Log.d("TrackingService", "Resume service")
+                        startTimer()
                     }
-                    Log.d("TrackingService", "Started or resume service")
                 }
                 TRACKING_ACTION_PAUSE_SERVICE -> {
                     Log.d("TrackingService", "Pause service")
@@ -89,7 +106,7 @@ class TrackingService: LifecycleService() {
     }
 
     private fun startServiceForeground() {
-        addEmptyPolyline()
+        startTimer()
         isTracking.postValue(true)
 
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -109,8 +126,31 @@ class TrackingService: LifecycleService() {
         startForeground(NOTIFICATION_TRACKING_SERVICE_ID, notificationBuilder.build())
     }
 
+    private fun startTimer() {
+        addEmptyPolyline()
+        isTracking.postValue(true)
+        timeStarted = System.currentTimeMillis()
+        isTimerEnabled = true
+        CoroutineScope(Dispatchers.Main).launch {
+            while(isTracking.value!!) {
+                // time diff between now and time started
+                lapTime = System.currentTimeMillis() - timeStarted
+
+                timeRunInMillis.postValue(timeRun + lapTime)
+
+                if (timeRunInMillis.value!! >= lastSecondTimestamp + 1000L) {
+                    timeRunInSeconds.postValue(timeRunInSeconds.value!! + 1)
+                    lastSecondTimestamp += 1000L
+                }
+                delay(50L)
+            }
+            timeRun += lapTime
+        }
+    }
+
     private fun pauseService() {
         isTracking.postValue(false)
+        isTimerEnabled = false
     }
 
     private fun addEmptyPolyline() = pathPoints.value?.apply {
