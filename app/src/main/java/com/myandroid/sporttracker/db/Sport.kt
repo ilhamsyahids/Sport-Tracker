@@ -10,7 +10,8 @@ data class Sport(
         var timestamp: Long = 0L,
         var distanceInMeters: Int = 0,
         var timeInMillis: Long = 0L,
-        var type: SportType? = null
+        var type: SportType? = null,
+        var steps: Int? = null
 ) {
     @PrimaryKey(autoGenerate = true)
     var id: Int? = null

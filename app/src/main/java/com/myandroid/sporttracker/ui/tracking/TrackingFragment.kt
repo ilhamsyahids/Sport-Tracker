@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.widget.AdapterView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -38,8 +39,10 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
     private var mMap: GoogleMap? = null
 
     private var isTracking = false
+    private var isStart = false
     private var pathPoints = mutableListOf<PolyLine>()
     private var currentTimeInMillis = 0L
+    private var sportType: SportType = SportType.CYCLING
 
     private var menu: Menu? = null
 
@@ -58,6 +61,18 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
         mapView.onCreate(savedInstanceState)
 
         mapView.getMapAsync(this)
+
+        sportOptions.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                when(position) {
+                    0 -> sportType = SportType.CYCLING
+                    1 -> sportType = SportType.RUNNING
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
 
         btnToggleTracking.setOnClickListener {
             toggleTracking()
@@ -97,8 +112,16 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
             for (polyline in pathPoints) {
                 distanceInMeters += TrackingUtil.calcPolylineLength(polyline).toInt()
             }
+
             val dateTimestamp = Calendar.getInstance().timeInMillis
-            val sport = Sport(bmp, dateTimestamp, distanceInMeters, currentTimeInMillis, SportType.CYCLING)
+
+            var step: Int? = null
+            if (sportType == SportType.RUNNING) {
+                // get data from sensor Step
+                step = 0
+            }
+
+            val sport = Sport(bmp, dateTimestamp, distanceInMeters, currentTimeInMillis, SportType.CYCLING, step)
 
             viewModel.insertSport(sport)
             Toast.makeText(
@@ -146,7 +169,6 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
 
     private fun subscribeToObservers() {
         TrackingService.isTracking.observe(viewLifecycleOwner, {
-            Log.d("isTracking.observe", it.toString())
             if (it != -1) updateBtnTracking(it == 1)
         })
 
@@ -160,6 +182,11 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
             currentTimeInMillis = it
             val formatted = TrackingUtil.getFormattedStopWatchTime(currentTimeInMillis, true)
             tvTimer.text = formatted
+            if (!isStart && currentTimeInMillis > 0L) {
+                isStart = true
+                sportOptions.isEnabled = false
+                sportOptions.isClickable = false
+            }
         })
     }
 
@@ -167,8 +194,14 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
         if (isTracking) {
             menu?.getItem(0)?.isVisible = true
             sendCommandToTrackingService(TRACKING_ACTION_PAUSE_SERVICE)
+            if (sportType == SportType.RUNNING) {
+                // pause sensor Step
+            }
         } else {
             sendCommandToTrackingService(TRACKING_ACTION_START_OR_RESUME_SERVICE)
+            if (sportType == SportType.RUNNING) {
+                // start sensor step
+            }
         }
     }
 
@@ -235,6 +268,9 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
     private fun stopTrack() {
         sendCommandToTrackingService(TRACKING_ACTION_PAUSE_SERVICE)
         sendCommandToTrackingService(TRACKING_ACTION_STOP_SERVICE)
+        if (sportType == SportType.RUNNING) {
+            // stop sensor Step
+        }
         findNavController().navigate(R.id.action_trackingFragment_to_nav_track)
     }
 
