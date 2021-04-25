@@ -5,18 +5,24 @@ import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.view.animation.Animation
+import android.view.animation.RotateAnimation
 import android.widget.AdapterView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import com.google.android.gms.maps.*
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.myandroid.sporttracker.R
 import com.myandroid.sporttracker.db.Sport
 import com.myandroid.sporttracker.db.SportType
+import com.myandroid.sporttracker.sensors.Compass
+import com.myandroid.sporttracker.sensors.Compass.CompassListener
 import com.myandroid.sporttracker.services.PolyLine
 import com.myandroid.sporttracker.services.TrackingService
 import com.myandroid.sporttracker.util.Constant.TRACKING_ACTION_PAUSE_SERVICE
@@ -34,9 +40,11 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
         fun newInstance() = TrackingFragment()
     }
 
+    private var currentAzimuth: Float = 0.0f
     private val viewModel: TrackingViewModel by viewModels()
 
     private var mMap: GoogleMap? = null
+    private var compass: Compass? = null
 
     private var isTracking = false
     private var isStart = false
@@ -45,6 +53,12 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
     private var sportType: SportType = SportType.CYCLING
 
     private var menu: Menu? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setupCompass()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -203,14 +217,14 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
         TrackingService.sportType.observe(viewLifecycleOwner, {
             Log.d("POSITION SUBS", it.name)
 
-            when (it) {
+            sportType = when (it) {
                 SportType.CYCLING -> {
                     sportOptions?.setSelection(0)
-                    sportType = SportType.CYCLING
+                    SportType.CYCLING
                 }
                 SportType.RUNNING -> {
                     sportOptions?.setSelection(1)
-                    sportType = SportType.RUNNING
+                    SportType.RUNNING
                 }
             }
         })
@@ -310,12 +324,14 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
 
     override fun onPause() {
         super.onPause()
+        compass?.stop()
 
         mapView?.onPause()
     }
 
     override fun onStart() {
         super.onStart()
+        compass?.start()
 
         mapView?.onStart()
     }
@@ -336,5 +352,32 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
         super.onSaveInstanceState(outState)
 
         mapView?.onSaveInstanceState(outState)
+    }
+
+    private fun setupCompass() {
+        compass = Compass(this)
+        compass?.setListener(getCompassListener())
+    }
+
+    private fun adjustCompassImage(azimuth: Float) {
+        val an: Animation = RotateAnimation(-currentAzimuth, -azimuth, Animation.RELATIVE_TO_SELF,
+                0.5f, Animation.RELATIVE_TO_SELF, 0.5f)
+        currentAzimuth = azimuth
+        an.duration = 500
+        an.repeatCount = 0
+        an.fillAfter = true
+        compass_image?.startAnimation(an)
+    }
+
+    private fun getCompassListener(): CompassListener {
+        return object : CompassListener {
+            override fun onNewAzimuth(azimuth: Float) {
+                adjustCompassImage(azimuth)
+            }
+        }
+    }
+
+    fun getSystemService(sensorService: String): Any {
+        return requireActivity().getSystemService(sensorService)
     }
 }
