@@ -6,24 +6,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CalendarView
-import android.widget.TextView
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.Navigation.findNavController
 import androidx.navigation.fragment.findNavController
+import com.applandeo.materialcalendarview.CalendarView
 import com.myandroid.sporttracker.R
 import com.myandroid.sporttracker.util.TrackingUtil
+import dagger.hilt.android.AndroidEntryPoint
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
-import java.text.SimpleDateFormat
-import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.*
 
+
+@AndroidEntryPoint
 class TrackFragment : Fragment(), EasyPermissions.PermissionCallbacks {
 
     private lateinit var trackViewModel: TrackViewModel
@@ -37,41 +33,10 @@ class TrackFragment : Fragment(), EasyPermissions.PermissionCallbacks {
         trackViewModel =
             ViewModelProvider(this).get(TrackViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_track, container, false)
-        val textView: TextView = root.findViewById(R.id.text_dashboard)
-        trackViewModel.text.observe(viewLifecycleOwner, Observer {
-            textView.text = it
-        })
-
 
         val calendarView = root.findViewById<CalendarView>(R.id.calendarView)
-        calendarView?.setOnDateChangeListener { _, year, month, dayOfMonth ->
-            // Note that months are indexed from 0. So, 0 means January, 1 means february, 2 means march etc.
-            val msg = "Selected date is " + dayOfMonth + "/" + (month + 1) + "/" + year
-            Toast.makeText(this.context, msg, Toast.LENGTH_SHORT).show()
-        }
-
-        val current = LocalDateTime.now()
-        val day = current.dayOfMonth
-        val month = current.monthValue
-        val year = current.year
-        val yearMonthObject: YearMonth = YearMonth.of(year, month)
-        val daysInMonth: Int = yearMonthObject.lengthOfMonth()
-
-        val myDate = "$year/$month/$daysInMonth 23:59:59"
-        val sdf = SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
-        val date: Date = sdf.parse(myDate)!!
-        val millis = date.time
-
-        val yearBefore = year - 1
-        val myDate1 = "$yearBefore/$month/$day 00:00:00"
-        val sdf1 = SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
-        val date1: Date = sdf1.parse(myDate1)!!
-        val millis1 = date1.time
-
-        calendarView?.setMinDate(millis1)
-        calendarView?.setMaxDate(millis)
-
-
+        val max = Calendar.getInstance()
+        calendarView.setMaximumDate(max)
 
 
         requestPermissions()

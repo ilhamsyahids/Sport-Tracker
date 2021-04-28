@@ -102,4 +102,7 @@ dependencies {
 
     // Easy Permissions
     implementation 'pub.devrel:easypermissions:3.0.0'
+
+    // Calendar view
+    implementation 'com.applandeo:material-calendar-view:1.7.0'
 }
