@@ -1,9 +1,9 @@
 package com.myandroid.sporttracker.ui.tracking
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.view.animation.Animation
 import android.view.animation.RotateAnimation
@@ -25,6 +25,7 @@ import com.myandroid.sporttracker.sensors.Compass
 import com.myandroid.sporttracker.sensors.Compass.CompassListener
 import com.myandroid.sporttracker.services.PolyLine
 import com.myandroid.sporttracker.services.TrackingService
+import com.myandroid.sporttracker.util.Constant.KEY_HEIGHT
 import com.myandroid.sporttracker.util.Constant.TRACKING_ACTION_PAUSE_SERVICE
 import com.myandroid.sporttracker.util.Constant.TRACKING_ACTION_START_OR_RESUME_SERVICE
 import com.myandroid.sporttracker.util.Constant.TRACKING_ACTION_STOP_SERVICE
@@ -32,13 +33,13 @@ import com.myandroid.sporttracker.util.TrackingUtil
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_tracking.*
 import java.util.*
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class TrackingFragment : Fragment(), OnMapReadyCallback {
 
-    companion object {
-        fun newInstance() = TrackingFragment()
-    }
+    @Inject
+    lateinit var sharedPref: SharedPreferences
 
     private var currentAzimuth: Float = 0.0f
     private val viewModel: TrackingViewModel by viewModels()
@@ -78,7 +79,6 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
 
         sportOptions?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                Log.d("POSITION", position.toString())
                 when(position) {
                     0 -> {
                         if (!isStart) {
@@ -98,7 +98,7 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
 
 
         btnToggleTracking.setOnClickListener {
-            toggleTracking()
+            preTracking()
         }
         
         btnFinishTrack.setOnClickListener {
@@ -107,6 +107,23 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
         }
 
         subscribeToObservers()
+    }
+
+    private fun preTracking() {
+        if (sportType == SportType.RUNNING) {
+            val h = sharedPref.getInt(KEY_HEIGHT, 0)
+            if (h == 0) {
+                Toast.makeText(
+                    this.context,
+                    "Please setup height in Settings tab",
+                    Toast.LENGTH_LONG)
+                    .show()
+            } else {
+                toggleTracking()
+            }
+        } else {
+            toggleTracking()
+        }
     }
 
     private fun viewAllTrack() {
@@ -139,11 +156,11 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
             val dateTimestamp = Calendar.getInstance().timeInMillis
 
             var step: Int? = null
-            Log.d("SPORTTYPE", sportType.toString())
             if (sportType == SportType.RUNNING) {
-                Log.d("SportType", "RUNNING")
-                Log.d("SENSOR", "Get data from sensor Step")
-                step = 0
+                // https://www.inchcalculator.com/distance-to-steps-calculator/
+                val height = sharedPref.getInt(KEY_HEIGHT, 1)
+                val stride = height * 0.43 / 100
+                step = (distanceInMeters / stride).toInt()
             }
 
             val sport = Sport(bmp, dateTimestamp, distanceInMeters, currentTimeInMillis, SportType.CYCLING, step)
@@ -215,8 +232,6 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
         })
 
         TrackingService.sportType.observe(viewLifecycleOwner, {
-            Log.d("POSITION SUBS", it.name)
-
             sportType = when (it) {
                 SportType.CYCLING -> {
                     sportOptions?.setSelection(0)
@@ -235,14 +250,8 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
         if (isTracking) {
             menu?.getItem(0)?.isVisible = true
             sendCommandToTrackingService(TRACKING_ACTION_PAUSE_SERVICE)
-            if (sportType == SportType.RUNNING) {
-                Log.d("SENSOR", "Pause Sensor Step")
-            }
         } else {
             sendCommandToTrackingService(TRACKING_ACTION_START_OR_RESUME_SERVICE)
-            if (sportType == SportType.RUNNING) {
-                Log.d("SENSOR", "Start Sensor Step")
-            }
         }
     }
 
@@ -309,10 +318,6 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
     private fun stopTrack() {
         sendCommandToTrackingService(TRACKING_ACTION_PAUSE_SERVICE)
         sendCommandToTrackingService(TRACKING_ACTION_STOP_SERVICE)
-        if (sportType == SportType.RUNNING) {
-            Log.d("SportType", "RUNNING")
-            Log.d("SENSOR",  "Stop Sensor Step")
-        }
         findNavController().navigate(R.id.action_trackingFragment_to_nav_track)
     }
 

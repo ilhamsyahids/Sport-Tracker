@@ -12,4 +12,6 @@ object Constant {
     const val NOTIFICATION_TRACKING_SERVICE_CHANNEL_ID = "sport_tracker_tracking_service"
     const val NOTIFICATION_TRACKING_SERVICE_CHANNEL_NAME = "Tracking Service Sport Tracker"
     const val NOTIFICATION_TRACKING_SERVICE_ID = 1
+
+    const val KEY_HEIGHT = "KEY_HEIGHT"
 }

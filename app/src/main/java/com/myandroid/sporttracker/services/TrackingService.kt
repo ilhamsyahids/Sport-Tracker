@@ -158,9 +158,6 @@ class TrackingService: LifecycleService() {
         timeStarted = System.currentTimeMillis()
         isTimerEnabled = true
 
-        if (sportType.value == SportType.RUNNING) {
-            Log.d("SENSOR", "Start and resume sensor step")
-        }
         CoroutineScope(Dispatchers.Main).launch {
             while(isTracking.value!! == 1) {
                 // time diff between now and time started
@@ -181,13 +178,6 @@ class TrackingService: LifecycleService() {
     private fun pauseService() {
         isTracking.postValue(0)
         isTimerEnabled = false
-
-        Log.d("Service Sport Type", sportType.value.toString())
-
-        if (sportType.value == SportType.RUNNING) {
-            Log.d("Service Sport Type", "TODO")
-            Log.d("SENSOR", "Pause sensor step")
-        }
     }
 
     private fun addEmptyPolyline() = pathPoints.value?.apply {
