@@ -38,4 +38,9 @@
             android:id="@+id/action_trackingFragment_to_nav_track"
             app:destination="@id/nav_track" />
     </fragment>
+    <fragment
+        android:id="@+id/nav_settings"
+        android:name="com.myandroid.sporttracker.SettingsFragment"
+        android:label="@string/title_settings"
+        tools:layout="@layout/fragment_settings" />
 </navigation>

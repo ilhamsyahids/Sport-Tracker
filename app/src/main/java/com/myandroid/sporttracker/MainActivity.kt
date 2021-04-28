@@ -27,11 +27,12 @@ class MainActivity : AppCompatActivity() {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         navView.setupWithNavController(navController)
+        navView.setOnNavigationItemReselectedListener {}
 
         navController
             .addOnDestinationChangedListener { _, destination, _ ->
                 when(destination.id) {
-                    R.id.nav_home, R.id.nav_track, R.id.nav_scheduler ->
+                    R.id.nav_home, R.id.nav_track, R.id.nav_scheduler, R.id.nav_settings ->
                         navView.visibility = View.VISIBLE
                     else -> navView.visibility = View.GONE
                 }
