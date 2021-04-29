@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
         navController
             .addOnDestinationChangedListener { _, destination, _ ->
                 when(destination.id) {
-                    R.id.nav_home, R.id.nav_track, R.id.nav_scheduler, R.id.nav_settings ->
+                    R.id.nav_home, R.id.nav_track, R.id.nav_schedule, R.id.nav_settings ->
                         navView.visibility = View.VISIBLE
                     else -> navView.visibility = View.GONE
                 }

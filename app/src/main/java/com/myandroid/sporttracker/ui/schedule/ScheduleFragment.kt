@@ -1,4 +1,4 @@
-package com.myandroid.sporttracker.ui.notifications
+package com.myandroid.sporttracker.ui.schedule
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,20 +10,20 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.myandroid.sporttracker.R
 
-class NotificationsFragment : Fragment() {
+class ScheduleFragment : Fragment() {
 
-    private lateinit var notificationsViewModel: NotificationsViewModel
+    private lateinit var scheduleViewModel: ScheduleViewModel
 
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
-        notificationsViewModel =
-                ViewModelProvider(this).get(NotificationsViewModel::class.java)
-        val root = inflater.inflate(R.layout.fragment_scheduler, container, false)
+        scheduleViewModel =
+                ViewModelProvider(this).get(ScheduleViewModel::class.java)
+        val root = inflater.inflate(R.layout.fragment_schedule, container, false)
         val textView: TextView = root.findViewById(R.id.text_notifications)
-        notificationsViewModel.text.observe(viewLifecycleOwner, Observer {
+        scheduleViewModel.text.observe(viewLifecycleOwner, Observer {
             textView.text = it
         })
         return root

@@ -12,9 +12,9 @@
         android:title="@string/title_track" />
 
     <item
-        android:id="@+id/nav_scheduler"
+        android:id="@+id/nav_schedule"
         android:icon="@drawable/ic_notifications_black_24dp"
-        android:title="@string/title_scheduler" />
+        android:title="@string/title_schedule" />
 
     <item
         android:id="@+id/nav_settings"

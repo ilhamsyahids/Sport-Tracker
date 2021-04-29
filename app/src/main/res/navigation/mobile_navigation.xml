@@ -26,10 +26,10 @@
     </fragment>
 
     <fragment
-        android:id="@+id/nav_scheduler"
-        android:name="com.myandroid.sporttracker.ui.notifications.NotificationsFragment"
-        android:label="@string/title_scheduler"
-        tools:layout="@layout/fragment_scheduler" />
+        android:id="@+id/nav_schedule"
+        android:name="com.myandroid.sporttracker.ui.schedule.ScheduleFragment"
+        android:label="@string/title_schedule"
+        tools:layout="@layout/fragment_schedule" />
     <fragment
         android:id="@+id/trackingFragment"
         android:name="com.myandroid.sporttracker.ui.tracking.TrackingFragment"
