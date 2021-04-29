@@ -1,6 +1,7 @@
 package com.myandroid.sporttracker.ui.track
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,9 +9,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.applandeo.materialcalendarview.CalendarView
+import com.applandeo.materialcalendarview.EventDay
+import com.applandeo.materialcalendarview.listeners.OnDayClickListener
 import com.myandroid.sporttracker.R
 import com.myandroid.sporttracker.util.TrackingUtil
 import dagger.hilt.android.AndroidEntryPoint
@@ -24,6 +29,7 @@ class TrackFragment : Fragment(), EasyPermissions.PermissionCallbacks {
 
     private lateinit var trackViewModel: TrackViewModel
 
+    @SuppressLint("FragmentLiveDataObserve")
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -34,12 +40,36 @@ class TrackFragment : Fragment(), EasyPermissions.PermissionCallbacks {
             ViewModelProvider(this).get(TrackViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_track, container, false)
 
+        trackViewModel.allSport.observe(this, Observer {
+
+        })
+
         val calendarView = root.findViewById<CalendarView>(R.id.calendarView)
         val max = Calendar.getInstance()
-        calendarView.setMaximumDate(max)
 
+        var events: MutableList<EventDay> = mutableListOf<EventDay>()
+
+        Transformations.map(trackViewModel.allSport) { list ->
+            list.map { item ->
+//                Log.println(Log.ERROR, "Timestamp", item.timestamp.toString())
+                val calendar = Calendar.getInstance()
+                calendar.timeInMillis = item.timestamp
+                val mYear = calendar.get(Calendar.YEAR)
+                val mMonth = calendar.get(Calendar.MONTH)
+                val mDay = calendar.get(Calendar.DAY_OF_MONTH)
+                calendar.set(mYear, mMonth, mDay)
+                events.add(EventDay(calendar, R.drawable.ic_run))
+            }
+        }
+
+        calendarView.setMaximumDate(max)
+        calendarView.setEvents(events)
 
         requestPermissions()
+        calendarView.setOnDayClickListener(OnDayClickListener() { eventDay ->
+            val clickedDayCalendar = eventDay.calendar
+        })
+
 
         root.findViewById<View>(R.id.fab).setOnClickListener {
             findNavController().navigate(R.id.action_nav_track_to_trackingFragment)
