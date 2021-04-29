@@ -29,7 +29,11 @@
         android:id="@+id/nav_schedule"
         android:name="com.myandroid.sporttracker.ui.schedule.ScheduleFragment"
         android:label="@string/title_schedule"
-        tools:layout="@layout/fragment_schedule" />
+        tools:layout="@layout/fragment_schedule" >
+        <action
+            android:id="@+id/action_nav_schedule_to_scheduleAddFragment"
+            app:destination="@id/scheduleAddFragment" />
+    </fragment>
     <fragment
         android:id="@+id/trackingFragment"
         android:name="com.myandroid.sporttracker.ui.tracking.TrackingFragment"
@@ -43,4 +47,12 @@
         android:name="com.myandroid.sporttracker.ui.settings.SettingsFragment"
         android:label="@string/title_settings"
         tools:layout="@layout/fragment_settings" />
+    <fragment
+        android:id="@+id/scheduleAddFragment"
+        android:name="com.myandroid.sporttracker.ui.schedule.ScheduleAddFragment"
+        android:label="ScheduleAddFragment" >
+        <action
+            android:id="@+id/action_scheduleAddFragment_to_nav_schedule"
+            app:destination="@id/nav_schedule" />
+    </fragment>
 </navigation>

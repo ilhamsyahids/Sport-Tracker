@@ -14,5 +14,14 @@
     <string name="compass_image">Compass Image</string>
     <string name="save">Save</string>
     <string name="noSchedule">Click on the button below to create your schedule!</string>
+    <string name="add_schedule">Add Schedule</string>
+    <string name="reminder_name_label">Name:</string>
+    <string name="reminder_name_hint">Enter Name of Schedule</string>
+    <string name="frequency">Frequency:</string>
+    <string name="reminder_type">Type:</string>
+    <string name="select_days">Select Days</string>
+    <string name="set_time">Set Time</string>
+    <string name="more_details">More Details</string>
+    <string name="additional_details">Enter Additional Details</string>
     <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">API_KEY</string>
 </resources>
