@@ -250,6 +250,10 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
                     sportOptions?.setSelection(1)
                     SportType.RUNNING
                 }
+                else -> {
+                    sportOptions?.setSelection(0)
+                    SportType.CYCLING
+                }
             }
         })
 
