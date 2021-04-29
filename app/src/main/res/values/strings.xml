@@ -13,5 +13,6 @@
     <string name="height">Height (cm)</string>
     <string name="compass_image">Compass Image</string>
     <string name="save">Save</string>
+    <string name="noSchedule">Click on the button below to create your schedule!</string>
     <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">API_KEY</string>
 </resources>
