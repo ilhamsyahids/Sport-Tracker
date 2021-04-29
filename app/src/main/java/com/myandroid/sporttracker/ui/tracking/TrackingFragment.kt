@@ -102,8 +102,17 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
         }
         
         btnFinishTrack.setOnClickListener {
-            viewAllTrack()
-            finishTrackAndSaveToDb()
+            if (pathPoints[0].isEmpty()) {
+                Toast.makeText(
+                    this.context,
+                    "No data tracked",
+                    Toast.LENGTH_LONG)
+                    .show()
+                stopTrack()
+            } else {
+                viewAllTrack()
+                finishTrackAndSaveToDb()
+            }
         }
 
         subscribeToObservers()
