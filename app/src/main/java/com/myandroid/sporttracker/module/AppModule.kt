@@ -18,12 +18,16 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideSportDatabase(@ApplicationContext app: Context) =
+    fun provideWorkoutDatabase(@ApplicationContext app: Context) =
         Room.databaseBuilder(app, WorkoutDatabase::class.java, SPORT_DATABASE_NAME).build()
 
     @Singleton
     @Provides
     fun provideSportDao(db: WorkoutDatabase) = db.getSportDao()
+
+    @Singleton
+    @Provides
+    fun provideReminderDao(db: WorkoutDatabase) = db.getReminderDao()
 
     @Singleton
     @Provides

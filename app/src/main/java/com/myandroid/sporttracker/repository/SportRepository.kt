@@ -7,5 +7,6 @@ import javax.inject.Inject
 class SportRepository @Inject constructor(private val sportDAO: SportDAO) {
 
     suspend fun insertSport(sport: Sport) = sportDAO.insertSport(sport)
-    suspend fun getAllSportByDate() = sportDAO.getAllSportByDate()
+    suspend fun deleteSport(sport: Sport) = sportDAO.deleteSport(sport)
+    fun getAllSportByDate() = sportDAO.getAllSportByDate()
 }
