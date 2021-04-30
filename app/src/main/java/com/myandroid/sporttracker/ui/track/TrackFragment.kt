@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -51,6 +52,7 @@ class TrackFragment : Fragment(), EasyPermissions.PermissionCallbacks {
         requestPermissions()
         calendarView.setOnDayClickListener(OnDayClickListener() { eventDay ->
             val clickedDayCalendar = eventDay.calendar
+            findNavController().navigate(R.id.action_nav_track_to_trackPerDayFragment)
         })
 
 
