@@ -47,8 +47,8 @@ class ReminderAdapter: RecyclerView.Adapter<ReminderAdapter.ReminderViewHolder>(
             reminder_title.text = reminder.name
             reminder_category.text = reminder.type?.name
             toggleButton.isChecked = reminder.isEnabled
-            if (reminder.frequency?.ordinal == 0) {
-                reminder_when.text =
+            reminder_when.text = when (reminder.frequency?.ordinal) {
+                0 -> { // One Time
                     if (reminder.month!! < 12)
                         String.format(
                             resources.getString(R.string.one_time_frequency_display),
@@ -60,6 +60,18 @@ class ReminderAdapter: RecyclerView.Adapter<ReminderAdapter.ReminderViewHolder>(
                                     TimeDateUtil.formatTimeInMilliseconds(reminder.timeInMilliseconds)
                                 )
                     else resources.getString(R.string.time_not_set)
+                }
+                1 -> { // Daily
+                    resources.getString(R.string.daily_frequency_display) + TimeDateUtil.formatTimeInMilliseconds(reminder.timeInMilliseconds)
+                }
+                2 -> { // Weekly
+                    String.format(resources.getString(R.string.weekly_frequency_display), reminder.customDays?.size) +
+                            String.format(
+                                resources.getString(R.string.at_time),
+                                TimeDateUtil.formatTimeInMilliseconds(reminder.timeInMilliseconds)
+                            )
+                }
+                else -> resources.getString(R.string.time_not_set)
             }
         }
     }

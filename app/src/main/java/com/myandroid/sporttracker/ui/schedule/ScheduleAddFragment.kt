@@ -138,17 +138,15 @@ class ScheduleAddFragment : Fragment(), AdapterView.OnItemSelectedListener {
                 day = -1
                 if (mCustomScheduleDays.isNullOrEmpty()) {
                     //error
-                    Toast.makeText(context, getString(R.string.fill_atleast_one_day), Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, getString(R.string.fill_at_least_one_day), Toast.LENGTH_LONG).show()
                     select_day_error.visibility = View.VISIBLE
                     return
                 }
-            }
-            Frequency.Monthly.ordinal -> {
-                if (DatePickerFragment.mDay == 0) {
-                    Toast.makeText(context, R.string.fill_pick_date_and_time, Toast.LENGTH_LONG).show()
+                if (timeSet == null || timeSet.matches(getString(R.string.time_not_set).toRegex())) {
+                    Toast.makeText(context, getString(R.string.fill_pick_time), Toast.LENGTH_LONG).show()
+                    select_day_error.visibility = View.VISIBLE
                     return
                 }
-                day = DatePickerFragment.mDay
             }
             Frequency.OneTime.ordinal -> {
                 if (DatePickerFragment.mDay == 0 ||
@@ -186,7 +184,7 @@ class ScheduleAddFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
     private fun saveReminder(reminder: Reminder) {
         viewModel.insertReminder(reminder)
-        Toast.makeText(context, getString(R.string.successfuly_added), Toast.LENGTH_LONG).show()
+        Toast.makeText(context, getString(R.string.successfully_added), Toast.LENGTH_LONG).show()
         findNavController().navigate(R.id.action_scheduleAddFragment_to_nav_schedule)
     }
 

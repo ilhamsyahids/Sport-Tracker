@@ -27,5 +27,5 @@ data class Reminder(
 }
 
 enum class Frequency {
-    OneTime, Daily, Weekly, Monthly
+    OneTime, Daily, Weekly
 }

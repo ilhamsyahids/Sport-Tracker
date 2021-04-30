@@ -24,12 +24,15 @@
     <string name="set_date_and_time">Set Date and Time</string>
     <string name="more_details">More Details</string>
     <string name="additional_details">Enter Additional Details</string>
-    <string name="fill_the_name">Please fill the name</string>
-    <string name="fill_atleast_one_day">Please fill at least one day</string>
+    <string name="fill_the_name">Please Fill Name</string>
+    <string name="fill_at_least_one_day">Please Fill At Least One Day</string>
     <string name="fill_pick_date_and_time">Please Pick Date and Time</string>
+    <string name="fill_pick_time">Please Pick Time</string>
     <string name="time_not_set">Time not set</string>
-    <string name="successfuly_added">Successfully Added</string>
+    <string name="successfully_added">Successfully Added</string>
     <string name="one_time_frequency_display">On %d %s %d&#160;</string>
+    <string name="daily_frequency_display">"Every "</string>
+    <string name="weekly_frequency_display">%d day(s) Every Week&#160;</string>
     <string name="at_time">at %s&#160;</string>
     <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">API_KEY</string>
 </resources>
