@@ -19,6 +19,7 @@ import com.applandeo.materialcalendarview.listeners.OnDayClickListener
 import com.myandroid.sporttracker.R
 import com.myandroid.sporttracker.util.TrackingUtil
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.android.synthetic.main.fragment_track.*
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
 import java.util.*
@@ -40,30 +41,12 @@ class TrackFragment : Fragment(), EasyPermissions.PermissionCallbacks {
             ViewModelProvider(this).get(TrackViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_track, container, false)
 
-        trackViewModel.allSport.observe(this, Observer {
 
-        })
 
         val calendarView = root.findViewById<CalendarView>(R.id.calendarView)
         val max = Calendar.getInstance()
-
-        var events: MutableList<EventDay> = mutableListOf<EventDay>()
-
-        Transformations.map(trackViewModel.allSport) { list ->
-            list.map { item ->
-//                Log.println(Log.ERROR, "Timestamp", item.timestamp.toString())
-                val calendar = Calendar.getInstance()
-                calendar.timeInMillis = item.timestamp
-                val mYear = calendar.get(Calendar.YEAR)
-                val mMonth = calendar.get(Calendar.MONTH)
-                val mDay = calendar.get(Calendar.DAY_OF_MONTH)
-                calendar.set(mYear, mMonth, mDay)
-                events.add(EventDay(calendar, R.drawable.ic_run))
-            }
-        }
-
         calendarView.setMaximumDate(max)
-        calendarView.setEvents(events)
+
 
         requestPermissions()
         calendarView.setOnDayClickListener(OnDayClickListener() { eventDay ->
@@ -75,6 +58,25 @@ class TrackFragment : Fragment(), EasyPermissions.PermissionCallbacks {
             findNavController().navigate(R.id.action_nav_track_to_trackingFragment)
         }
         return root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        var events: MutableList<EventDay> = mutableListOf<EventDay>()
+
+        trackViewModel.allSport.observe(viewLifecycleOwner, Observer {
+            it.map { item ->
+                val calendar = Calendar.getInstance()
+                calendar.timeInMillis = item.timestamp
+                val mYear = calendar.get(Calendar.YEAR)
+                val mMonth = calendar.get(Calendar.MONTH)
+                val mDay = calendar.get(Calendar.DAY_OF_MONTH)
+                calendar.set(mYear, mMonth, mDay)
+                events.add(EventDay(calendar, R.drawable.ic_run))
+                calendarView.setEvents(events)
+            }
+        })
     }
 
 
