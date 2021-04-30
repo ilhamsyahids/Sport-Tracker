@@ -63,7 +63,7 @@ class TimePickerFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener 
         time.append(minute)
         time.append(amOrPm)
         val timeInMilliseconds = getTimestampInSeconds(time.toString()) * 1000
-        timeSet.value = formatTimeInMilliseconds(requireContext(), timeInMilliseconds)
+        timeSet.value = formatTimeInMilliseconds(timeInMilliseconds)
     }
 
     companion object {

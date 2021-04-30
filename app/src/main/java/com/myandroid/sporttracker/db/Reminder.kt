@@ -1,6 +1,7 @@
 package com.myandroid.sporttracker.db
 
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import kotlin.collections.ArrayList
 
@@ -20,6 +21,9 @@ data class Reminder(
 ) {
     @PrimaryKey(autoGenerate = true)
     var id: Int? = null
+
+    @Ignore
+    var timeInMilliseconds :Long = timeInSeconds * 1000
 }
 
 enum class Frequency {

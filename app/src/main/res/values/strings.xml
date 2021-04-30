@@ -29,5 +29,7 @@
     <string name="fill_pick_date_and_time">Please Pick Date and Time</string>
     <string name="time_not_set">Time not set</string>
     <string name="successfuly_added">Successfully Added</string>
+    <string name="one_time_frequency_display">On %d %s %d&#160;</string>
+    <string name="at_time">at %s&#160;</string>
     <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">API_KEY</string>
 </resources>

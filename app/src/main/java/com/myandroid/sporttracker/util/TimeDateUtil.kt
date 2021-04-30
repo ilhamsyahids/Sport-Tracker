@@ -3,6 +3,7 @@ package com.myandroid.sporttracker.util
 import android.content.Context
 import android.text.format.DateFormat
 import android.util.Log
+import java.text.DateFormatSymbols
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -23,14 +24,15 @@ object TimeDateUtil {
         }
     }
 
-    fun formatTimeInMilliseconds(context: Context?, timeInMilliseconds: Long): String {
+    fun formatTimeInMilliseconds(timeInMilliseconds: Long): String {
         if (timeInMilliseconds != 172800000L) {
-            val sdf = if (DateFormat.is24HourFormat(context))
-                SimpleDateFormat("HH:mm", Locale.ENGLISH)
-            else
-                SimpleDateFormat("HH:mm", Locale.ENGLISH)
+            val sdf = SimpleDateFormat("HH:mm", Locale.ENGLISH)
             return sdf.format(timeInMilliseconds)
         }
         return "Time Not Set"
+    }
+
+    fun getMonthName(month: Int): String {
+        return DateFormatSymbols().months[month]
     }
 }

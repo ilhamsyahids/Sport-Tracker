@@ -23,4 +23,10 @@ class ScheduleViewModel @ViewModelInject constructor(private val reminderReposit
     fun insertReminder(reminder: Reminder) = viewModelScope.launch {
         reminderRepository.insertReminder(reminder)
     }
+
+    fun getReminders(): LiveData<List<Reminder>> {
+        return reminderRepository.getAllRemindersByTime()
+    }
+
+    val reminderByDate = getReminders()
 }
