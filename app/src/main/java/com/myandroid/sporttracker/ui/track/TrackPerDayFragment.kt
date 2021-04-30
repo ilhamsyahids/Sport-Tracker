@@ -30,9 +30,15 @@ class TrackPerDayFragment : Fragment(R.layout.fragment_track_per_day_list) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
 
+        trackAdapter.setOnItemClickListener {
+            val bundle = Bundle().apply {
+                putSerializable("sport", it)
+            }
+            findNavController().navigate(R.id.action_trackPerDayFragment_to_trackDetails, bundle)
+        }
+
         trackViewModel.allSport.observe(viewLifecycleOwner, Observer {
             trackAdapter.submitList(it)
-
         })
     }
 

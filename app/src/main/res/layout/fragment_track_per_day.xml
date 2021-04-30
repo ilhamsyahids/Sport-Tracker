@@ -45,6 +45,14 @@
             android:textAppearance="?attr/textAppearanceListItem" />
 
         <TextView
+            android:id="@+id/steps"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="3dp"
+            android:visibility="gone"
+            android:textAppearance="?attr/textAppearanceListItem" />
+
+        <TextView
             android:id="@+id/duration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

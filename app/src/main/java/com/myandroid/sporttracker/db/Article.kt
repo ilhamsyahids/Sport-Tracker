@@ -2,6 +2,7 @@ package com.myandroid.sporttracker.db
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.io.Serializable
 
 
 @Entity(tableName = "article_table")
@@ -14,7 +15,7 @@ data class Article(
      val title: String = "",
      val url: String = "",
      val urlToImage: String = ""
-) {
+) : Serializable {
     @PrimaryKey(autoGenerate = true)
     var id: Int? = null
 }

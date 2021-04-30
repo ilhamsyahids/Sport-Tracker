@@ -14,8 +14,7 @@ import retrofit2.Response
 class HomeViewModel @ViewModelInject constructor(private val newsRepository: NewsRepository) : ViewModel()  {
 
     val newsList: MutableLiveData<Resource<NewsList>> = MutableLiveData()
-    var newsPage = 1
-    var newsSize = 10
+    var newsResponse: NewsList? = null
 
     init {
         getNewsList()
@@ -23,7 +22,7 @@ class HomeViewModel @ViewModelInject constructor(private val newsRepository: New
 
     fun getNewsList(country: String = "id", category: String = "sports") = viewModelScope.launch {
         newsList.postValue(Resource.Loading())
-        val res = newsRepository.getNewsList(newsSize, newsPage)
+        val res = newsRepository.getNewsList(country, category)
         newsList.postValue(handleNewsResponse(res))
     }
 

@@ -25,78 +25,67 @@ Menu utama pada aplikasi ini adalah, Sport News, Training Tracker, Training Hist
 
 
 ## Library dan Asset yang digunakan dan justifikasi penggunaannya
-implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-implementation 'androidx.core:core-ktx:1.3.2'
-implementation 'androidx.appcompat:appcompat:1.2.0'
-implementation 'com.google.android.material:material:1.3.0'
-implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
-implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.2.0'
-implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-testImplementation 'junit:junit:4.+'
-androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-
-// Lifecycle Service
-implementation 'android.arch.lifecycle:extensions:1.1.1'
-
-// Material Design
-implementation 'com.google.android.material:material:1.3.0-alpha01'
-
-// Room
-implementation "androidx.room:room-runtime:2.2.5"
-kapt "androidx.room:room-compiler:2.2.5"
-
-// Kotlin Extensions and Coroutines support for Room
-implementation "androidx.room:room-ktx:2.2.5"
-
-// Coroutines
-implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5'
-implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.5'
-
-// Coroutine Lifecycle Scopes
-implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0"
-implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0"
-
-// Navigation Components
-implementation 'androidx.navigation:navigation-fragment-ktx:2.3.5'
-implementation 'androidx.navigation:navigation-ui-ktx:2.3.5'
-
-// Glide
-implementation 'com.github.bumptech.glide:glide:4.11.0'
-kapt 'com.github.bumptech.glide:compiler:4.11.0'
-
-// Google Maps Location Services
-implementation 'com.google.android.gms:play-services-location:17.0.0'
-implementation 'com.google.android.gms:play-services-maps:17.0.0'
-
-// Dagger Core
-implementation "com.google.dagger:dagger:2.28.1"
-kapt "com.google.dagger:dagger-compiler:2.25.2"
-
-// Dagger Android
-api 'com.google.dagger:dagger-android:2.28.1'
-api 'com.google.dagger:dagger-android-support:2.28.1'
-kapt 'com.google.dagger:dagger-android-processor:2.23.2'
-
-// Activity KTX for viewModels()
-implementation "androidx.activity:activity-ktx:1.1.0"
-
-//Dagger - Hilt
-implementation "com.google.dagger:hilt-android:2.28-alpha"
-kapt "com.google.dagger:hilt-android-compiler:2.28-alpha"
-
-implementation "androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha01"
-kapt "androidx.hilt:hilt-compiler:1.0.0-alpha01"
-
-// Easy Permissions
-implementation 'pub.devrel:easypermissions:3.0.0'
-
-// Calendar view
-implementation 'com.applandeo:material-calendar-view:1.7.0'
-
-// Button Group
-implementation 'com.nex3z:toggle-button-group:1.2.3'
+1. General
+    - implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    - implementation 'androidx.core:core-ktx:1.3.2'
+    - implementation 'androidx.appcompat:appcompat:1.2.0'
+    - implementation 'com.google.android.material:material:1.3.0'
+    - implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    - implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
+    - implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.2.0'
+    - implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    - testImplementation 'junit:junit:4.+'
+    - androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    - androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+2. Lifecycle Service
+    - implementation 'android.arch.lifecycle:extensions:1.1.1'
+3. Material Design
+    - implementation 'com.google.android.material:material:1.3.0-alpha01'
+4. Room
+    - implementation "androidx.room:room-runtime:2.2.5"
+    - kapt "androidx.room:room-compiler:2.2.5"
+5. Kotlin Extensions and Coroutines support for Room
+    - implementation "androidx.room:room-ktx:2.2.5"
+6. Coroutines
+    - implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5'
+    - implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.5'
+7. Coroutine Lifecycle Scopes
+    - implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0"
+    - implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0"
+8.  Navigation Components
+    - implementation 'androidx.navigation:navigation-fragment-ktx:2.3.5'
+    - implementation 'androidx.navigation:navigation-ui-ktx:2.3.5'
+9. Glide
+    - implementation 'com.github.bumptech.glide:glide:4.11.0'
+    - kapt 'com.github.bumptech.glide:compiler:4.11.0'
+10. Google Maps Location Services
+    - implementation 'com.google.android.gms:play-services-location:17.0.0'
+    - implementation 'com.google.android.gms:play-services-maps:17.0.0'
+11. Dagger Core
+    - implementation "com.google.dagger:dagger:2.28.1"
+    - kapt "com.google.dagger:dagger-compiler:2.25.2"
+12. Dagger Android
+    - api 'com.google.dagger:dagger-android:2.28.1'
+    - api 'com.google.dagger:dagger-android-support:2.28.1'
+    - kapt 'com.google.dagger:dagger-android-processor:2.23.2'
+13. Activity KTX for viewModels()
+    - implementation "androidx.activity:activity-ktx:1.1.0"
+14. Dagger - Hilt
+    - implementation "com.google.dagger:hilt-android:2.28-alpha"
+    - kapt "com.google.dagger:hilt-android-compiler:2.28-alpha"
+    - implementation "androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha01"
+    - kapt "androidx.hilt:hilt-compiler:1.0.0-alpha01"
+15. Easy Permissions
+    -  implementation 'pub.devrel:easypermissions:3.0.0'
+16. Calendar view
+    - implementation 'com.applandeo:material-calendar-view:1.7.0'
+17. Button Group
+    - implementation 'com.nex3z:toggle-button-group:1.2.3'
+18. Retrofit
+    - implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    - implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    - implementation "com.squareup.okhttp3:okhttp:4.9.0"
+    - implementation "com.squareup.okhttp3:logging-interceptor:4.9.0"
 
 ## Screenshot aplikasi
 ![image](/capture/capture1.PNG)
@@ -107,7 +96,7 @@ implementation 'com.nex3z:toggle-button-group:1.2.3'
 ![image](/capture/capture6.PNG)
 
 ## Pembagian kerja anggota kelompok
-1. 13518028 Ilham Syahid Syamsudin  : 
-2. 13518013 Raras Pradnya Pramudita : 
-3. 13518046 Ferdina Wiranti Afifah  : 
+1. 13518013 Raras Pradnya Pramudita : Tracking List, Tracking Details
+2. 13518028 Ilham Syahid Syamsudin  : Tracking Service, Tracking Details, Compas, Scheduler, News, Webview, Settings
+3. 13518046 Ferdina Wiranti Afifah  : News
 

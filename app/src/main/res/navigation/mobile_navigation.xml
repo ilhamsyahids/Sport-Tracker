@@ -13,7 +13,11 @@
         android:id="@+id/nav_home"
         android:name="com.myandroid.sporttracker.ui.home.HomeFragment"
         android:label="@string/title_home"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_nav_home_to_articleFragment"
+            app:destination="@id/articleFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_track"
@@ -49,6 +53,9 @@
         <action
             android:id="@+id/action_details_to_list"
             app:destination="@id/trackPerDayFragment" />
+        <argument
+            android:name="sport"
+            app:argType="com.myandroid.sporttracker.db.Sport" />
     </fragment>
 
     <fragment
@@ -80,5 +87,14 @@
         <action
             android:id="@+id/action_scheduleAddFragment_to_nav_schedule"
             app:destination="@id/nav_schedule" />
+    </fragment>
+    <fragment
+        android:id="@+id/articleFragment"
+        android:name="com.myandroid.sporttracker.ui.home.ArticleFragment"
+        android:label="fragment_article"
+        tools:layout="@layout/fragment_article" >
+        <argument
+            android:name="article"
+            app:argType="com.myandroid.sporttracker.db.Article" />
     </fragment>
 </navigation>

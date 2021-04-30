@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.myandroid.sporttracker.R
 import com.myandroid.sporttracker.db.Sport
+import com.myandroid.sporttracker.db.SportType
+import kotlinx.android.synthetic.main.fragment_track_details.*
 import kotlinx.android.synthetic.main.fragment_track_per_day.view.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -43,6 +45,8 @@ class TrackAdapter() : RecyclerView.Adapter<TrackAdapter.TrackViewHolder>() {
         return view
     }
 
+    private var onItemClickListener: ((Sport) -> Unit)? = null
+
     override fun onBindViewHolder(holder: TrackViewHolder, position: Int) {
         val track = differ.currentList[position]
         holder.itemView.apply{
@@ -54,13 +58,27 @@ class TrackAdapter() : RecyclerView.Adapter<TrackAdapter.TrackViewHolder>() {
 
             distance.text = track.distanceInMeters.toString() + " meters"
 
-            duration.text = String.format("%02d min, %02d sec",
-                    TimeUnit.MILLISECONDS.toMinutes(track.timeInMillis),
+            if (track.type == SportType.RUNNING) {
+                steps.visibility = View.VISIBLE
+                steps.text = track.steps.toString() + " step(s)"
+            }
+
+            duration.text = String.format("%02d hr %02d min, %02d sec",
+                    TimeUnit.MILLISECONDS.toHours(track.timeInMillis),
+                    TimeUnit.MILLISECONDS.toMinutes(track.timeInMillis) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(track.timeInMillis)),
                     TimeUnit.MILLISECONDS.toSeconds(track.timeInMillis) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(track.timeInMillis)))
+
+            setOnClickListener {
+                onItemClickListener?.let { it(track) }
+            }
         }
     }
 
     override fun getItemCount(): Int {
         return differ.currentList.size
+    }
+
+    fun setOnItemClickListener(listener: (Sport) -> Unit) {
+        onItemClickListener = listener
     }
 }

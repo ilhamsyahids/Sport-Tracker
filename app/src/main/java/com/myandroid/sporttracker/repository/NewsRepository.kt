@@ -7,6 +7,6 @@
      private val api: NewsApi
  ) {
 
-     suspend fun getNewsList(size: Int, page: Int, country: String = "id", category: String = "sports") =
-         api.getNewsList(size, page, country, category)
+     suspend fun getNewsList(country: String = "id", category: String = "sports") =
+         api.getNewsList(country, category)
  }

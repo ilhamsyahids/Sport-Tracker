@@ -172,7 +172,7 @@ class TrackingFragment : Fragment(), OnMapReadyCallback {
                 step = (distanceInMeters / stride).toInt()
             }
 
-            val sport = Sport(bmp, dateTimestamp, distanceInMeters, currentTimeInMillis, SportType.CYCLING, step)
+            val sport = Sport(bmp, dateTimestamp, distanceInMeters, currentTimeInMillis, sportType, step)
 
             viewModel.insertSport(sport)
             Toast.makeText(

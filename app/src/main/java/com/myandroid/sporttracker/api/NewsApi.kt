@@ -10,8 +10,6 @@ interface NewsApi {
 
     @GET("v2/top-headlines")
     suspend fun getNewsList(
-        @Query("pageSize") size: Int = 10,
-        @Query("page") page: Int = 1,
         @Query("country") country: String = "id",
         @Query("category") category: String = "sports",
         @Query("apiKey") apiKey: String = NEWS_API_KEY,
