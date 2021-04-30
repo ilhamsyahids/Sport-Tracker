@@ -14,4 +14,7 @@ interface ReminderDAO {
 
     @Query("SELECT * FROM reminder_table ORDER BY timeInSeconds")
     fun getAllRemindersByTime(): LiveData<List<Reminder>>
+
+    @Query("UPDATE reminder_table SET isEnabled =:isEnabled WHERE id ==:id")
+    suspend fun setEnabled(id: Int, isEnabled: Boolean)
 }

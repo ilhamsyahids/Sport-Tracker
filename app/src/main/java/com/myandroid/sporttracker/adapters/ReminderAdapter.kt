@@ -15,6 +15,8 @@ import kotlinx.android.synthetic.main.item_reminder.view.*
 
 class ReminderAdapter: RecyclerView.Adapter<ReminderAdapter.ReminderViewHolder>() {
 
+    private var mListener: ReminderItemInteractionListener? = null
+
     inner class ReminderViewHolder(itemView: View): RecyclerView.ViewHolder(itemView)
 
     val differCallback = object : DiffUtil.ItemCallback<Reminder>() {
@@ -41,12 +43,17 @@ class ReminderAdapter: RecyclerView.Adapter<ReminderAdapter.ReminderViewHolder>(
         )
     }
 
+    fun setOnItemClickListener(listener: ReminderItemInteractionListener?) {
+        mListener = listener
+    }
+
     override fun onBindViewHolder(holder: ReminderViewHolder, position: Int) {
         val reminder = differ.currentList[position]
         holder.itemView.apply {
             reminder_title.text = reminder.name
             reminder_category.text = reminder.type?.name
             toggleButton.isChecked = reminder.isEnabled
+            toggleButton.setOnCheckedChangeListener { buttonView: CompoundButton, isChecked: Boolean -> mListener?.onToggleButtonClick(buttonView, isChecked, reminder) }
             reminder_when.text = when (reminder.frequency?.ordinal) {
                 0 -> { // One Time
                     if (reminder.month!! < 12)

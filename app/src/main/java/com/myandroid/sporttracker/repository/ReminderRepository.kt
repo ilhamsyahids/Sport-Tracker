@@ -8,5 +8,6 @@ class ReminderRepository @Inject constructor(private val reminderDAO: ReminderDA
 
     suspend fun insertReminder(reminder: Reminder) = reminderDAO.insertReminder(reminder)
     suspend fun deleteReminder(reminder: Reminder) = reminderDAO.deleteReminder(reminder)
+    suspend fun setReminderIsEnabled(reminder: Reminder) = reminderDAO.setEnabled(reminder.id, reminder.isEnabled)
     fun getAllRemindersByTime() = reminderDAO.getAllRemindersByTime()
 }

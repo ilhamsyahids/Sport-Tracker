@@ -20,7 +20,7 @@ data class Reminder(
     var customDays: ArrayList<Int?>? = ArrayList()
 ) {
     @PrimaryKey(autoGenerate = true)
-    var id: Int? = null
+    var id: Int = 0
 
     @Ignore
     var timeInMilliseconds :Long = timeInSeconds * 1000
