@@ -23,6 +23,19 @@
         <action
             android:id="@+id/action_nav_track_to_trackingFragment"
             app:destination="@id/trackingFragment" />
+        <action
+            android:id="@+id/action_nav_track_to_trackPerDayFragment"
+            app:destination="@id/trackPerDayFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/trackPerDayFragment"
+        android:name="com.myandroid.sporttracker.ui.track.TrackPerDayFragment"
+        android:label="@string/title_track"
+        tools:layout="@layout/fragment_track_per_day_list" >
+        <action
+            android:id="@+id/action_trackPerDayFragment_to_nav_track"
+            app:destination="@id/nav_track" />
     </fragment>
 
     <fragment
