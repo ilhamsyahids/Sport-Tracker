@@ -1,44 +1,46 @@
 package com.myandroid.sporttracker.ui.schedule
 
 import android.os.Bundle
+import android.text.TextUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import androidx.core.view.get
-import androidx.core.view.size
+import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.myandroid.sporttracker.R
 import com.myandroid.sporttracker.db.Frequency
 import com.myandroid.sporttracker.db.Reminder
+import com.myandroid.sporttracker.db.SportType
 import com.myandroid.sporttracker.ui.dialogs.DatePickerFragment
 import com.myandroid.sporttracker.ui.dialogs.TimePickerFragment
+import com.myandroid.sporttracker.util.TimeDateUtil.getTimestampInSeconds
 import com.nex3z.togglebuttongroup.button.CircularToggle
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_schedule_add.*
 import java.text.DateFormatSymbols
 import java.util.*
 
+@AndroidEntryPoint
 class ScheduleAddFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
-    private lateinit var scheduleViewModel: ScheduleViewModel
-    private var mReminder: Reminder? = null
+    private val viewModel: ScheduleViewModel by viewModels()
+//    private var mReminder: Reminder? = null
 
-    private var mCustomScheduleDays: java.util.ArrayList<Int?>? = arrayListOf()
+    private var mCustomScheduleDays: ArrayList<Int?>? = arrayListOf()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        scheduleViewModel =
-                ViewModelProvider(this).get(ScheduleViewModel::class.java)
-
-        mReminder = scheduleViewModel.selectedReminder
+//        mReminder = viewModel.selectedReminder
 
         return inflater.inflate(R.layout.fragment_schedule_add, container, false)
     }
@@ -61,7 +63,8 @@ class ScheduleAddFragment : Fragment(), AdapterView.OnItemSelectedListener {
         frequencyAdapter?.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         frequency_spinner.adapter = frequencyAdapter
         frequency_spinner.onItemSelectedListener = this
-        frequency_spinner.setSelection(mReminder?.frequency?.ordinal ?: 0)
+        frequency_spinner.setSelection(0)
+//        frequency_spinner.setSelection(mReminder?.frequency?.ordinal ?: 0)
     }
 
     private fun showSelectDaysSpinner() {
@@ -69,12 +72,12 @@ class ScheduleAddFragment : Fragment(), AdapterView.OnItemSelectedListener {
         select_days_toggle_group.visibility = View.VISIBLE
         select_day_error.visibility = View.VISIBLE
 
-        mReminder?.customDays?.forEach {
-            if (it != null && it > 0 && it <= select_days_toggle_group.size) {
-                val view = (select_days_toggle_group[it - 1] as CircularToggle)
-                select_days_toggle_group.check(view.id)
-            }
-        }
+//        mReminder?.customDays?.forEach {
+//            if (it != null && it > 0 && it <= select_days_toggle_group.size) {
+//                val view = (select_days_toggle_group[it - 1] as CircularToggle)
+//                select_days_toggle_group.check(view.id)
+//            }
+//        }
         select_days_toggle_group.setOnCheckedChangeListener { group, checkedId, isChecked ->
             val text = group.findViewById<CircularToggle>(checkedId).text
             val index = days.indexOf(text)
@@ -114,8 +117,77 @@ class ScheduleAddFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
     private fun setSave() {
         save_button.setOnClickListener {
-            // save
+            validateAndSave()
         }
+    }
+
+    private fun validateAndSave() {
+        if (TextUtils.isEmpty(reminder_edit_text.text.toString().trim { it <= ' ' })) {
+            Toast.makeText(context, getString(R.string.fill_the_name), Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val selection = frequency_spinner.selectedItemPosition
+        var day = 0
+        var month = 12
+        var year = 0
+        val timeSet = TimePickerFragment.timeSet.value
+
+        when (selection) {
+            Frequency.Weekly.ordinal -> {
+                day = -1
+                if (mCustomScheduleDays.isNullOrEmpty()) {
+                    //error
+                    Toast.makeText(context, getString(R.string.fill_atleast_one_day), Toast.LENGTH_LONG).show()
+                    select_day_error.visibility = View.VISIBLE
+                    return
+                }
+            }
+            Frequency.Monthly.ordinal -> {
+                if (DatePickerFragment.mDay == 0) {
+                    Toast.makeText(context, R.string.fill_pick_date_and_time, Toast.LENGTH_LONG).show()
+                    return
+                }
+                day = DatePickerFragment.mDay
+            }
+            Frequency.OneTime.ordinal -> {
+                if (DatePickerFragment.mDay == 0 ||
+                        DatePickerFragment.mMonth == 12 || DatePickerFragment.mYear == 0 ||
+                        timeSet?.matches(getString(R.string.time_not_set).toRegex()) == true) {
+                    Toast.makeText(context, R.string.fill_pick_date_and_time, Toast.LENGTH_LONG).show()
+                    return
+                }
+                day = DatePickerFragment.mDay
+                month = DatePickerFragment.mMonth
+                year = DatePickerFragment.mYear
+            }
+        }
+        val reminder = createNewReminder(timeSet, Frequency.values()[selection], day, month, year, mCustomScheduleDays)
+        saveReminder(reminder)
+    }
+
+
+    private fun createNewReminder(timeSet: String?, frequency: Frequency, day: Int, month: Int, year: Int, customScheduleDays: ArrayList<Int?>?): Reminder {
+        val sportType = SportType.valueOf(category_spinner.selectedItem.toString().toUpperCase(Locale.getDefault()))
+
+        return Reminder(
+                reminder_edit_text.text.toString(),
+                additional_details.text.toString(),
+                getTimestampInSeconds(timeSet),
+                sportType,
+                frequency,
+                timeSet?.matches(getString(R.string.time_not_set).toRegex()) == false,
+                day,
+                month,
+                year,
+                if (frequency == Frequency.Weekly && customScheduleDays != null) customScheduleDays else arrayListOf()
+        )
+    }
+
+    private fun saveReminder(reminder: Reminder) {
+        viewModel.insertReminder(reminder)
+        Toast.makeText(context, getString(R.string.successfuly_added), Toast.LENGTH_LONG).show()
+        findNavController().navigate(R.id.action_scheduleAddFragment_to_nav_schedule)
     }
 
     override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
