@@ -2,6 +2,9 @@ package com.myandroid.sporttracker.util
 
 object Constant {
 
+    const val BASE_URL = "https://newsapi.org/"
+    const val NEWS_API_KEY = "6953a7421bb749c589e687746c85eee8"
+
     const val SPORT_DATABASE_NAME = "sport_db"
 
     const val TRACKING_ACTION_START_OR_RESUME_SERVICE = "TRACKING_ACTION_START_OR_RESUME_SERVICE"
