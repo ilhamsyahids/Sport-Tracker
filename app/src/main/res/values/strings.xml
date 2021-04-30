@@ -34,5 +34,7 @@
     <string name="daily_frequency_display">"Every "</string>
     <string name="weekly_frequency_display">%d day(s) Every Week&#160;</string>
     <string name="at_time">at %s&#160;</string>
+    <string name="undo">Undo</string>
+    <string name="delete_schedule">Schedule Deleted</string>
     <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">API_KEY</string>
 </resources>

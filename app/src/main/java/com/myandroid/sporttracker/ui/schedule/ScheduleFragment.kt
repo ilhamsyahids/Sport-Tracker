@@ -1,6 +1,7 @@
 package com.myandroid.sporttracker.ui.schedule
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,11 +13,15 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.snackbar.Snackbar
 import com.myandroid.sporttracker.R
 import com.myandroid.sporttracker.adapters.ReminderAdapter
 import com.myandroid.sporttracker.db.Reminder
 import com.myandroid.sporttracker.ui.tracking.TrackingViewModel
+import com.myandroid.sporttracker.views.SwipeToDeleteCallback
+import com.myandroid.sporttracker.views.interfaces.OnDeleteReminderListener
 import com.myandroid.sporttracker.views.interfaces.ReminderItemInteractionListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_schedule.*
@@ -27,11 +32,12 @@ import kotlinx.coroutines.withContext
 import java.util.ArrayList
 
 @AndroidEntryPoint
-class ScheduleFragment : Fragment(), ReminderItemInteractionListener {
+class ScheduleFragment : Fragment(), ReminderItemInteractionListener, OnDeleteReminderListener {
 
     private val viewModel: ScheduleViewModel by viewModels()
 
     private lateinit var reminderAdapter: ReminderAdapter
+    private var allReminders: ArrayList<Reminder> = arrayListOf()
     private var isRescheduleAtLaunch = true
 
     override fun onCreateView(
@@ -54,6 +60,7 @@ class ScheduleFragment : Fragment(), ReminderItemInteractionListener {
         setupRecyclerView()
 
         viewModel.reminderByDate.observe(viewLifecycleOwner, {
+            allReminders = it as ArrayList<Reminder>
             reminderAdapter.submitList(it)
         })
     }
@@ -61,8 +68,15 @@ class ScheduleFragment : Fragment(), ReminderItemInteractionListener {
     private fun setupRecyclerView() {
         val self = this
         reminder_list.apply {
-            reminderAdapter = ReminderAdapter()
+            reminderAdapter = ReminderAdapter(self.requireContext())
+
             reminderAdapter.setOnItemClickListener(self)
+            reminderAdapter.setDeleteReminderListener(self)
+
+            // swap to delete
+            val itemTouchHelper = ItemTouchHelper(SwipeToDeleteCallback(reminderAdapter))
+            itemTouchHelper.attachToRecyclerView(reminder_list)
+
             adapter = reminderAdapter
             layoutManager = LinearLayoutManager(requireContext())
         }
@@ -78,5 +92,13 @@ class ScheduleFragment : Fragment(), ReminderItemInteractionListener {
             }
         }
         isRescheduleAtLaunch = false
+    }
+
+    override fun deleteReminder(position: Int) {
+        val deletedReminder = allReminders[position]
+        viewModel.deleteReminder(deletedReminder)
+        val snackbar = Snackbar.make(main_layout, getString(R.string.delete_schedule), Snackbar.LENGTH_LONG)
+        snackbar.setAction(getString(R.string.undo)) { viewModel.insertReminder(deletedReminder) }
+        snackbar.show()
     }
 }
