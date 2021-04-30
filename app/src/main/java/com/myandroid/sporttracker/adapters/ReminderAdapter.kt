@@ -1,5 +1,6 @@
 package com.myandroid.sporttracker.adapters
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,12 +11,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.myandroid.sporttracker.R
 import com.myandroid.sporttracker.db.Reminder
 import com.myandroid.sporttracker.util.TimeDateUtil
+import com.myandroid.sporttracker.views.interfaces.OnDeleteReminderListener
 import com.myandroid.sporttracker.views.interfaces.ReminderItemInteractionListener
 import kotlinx.android.synthetic.main.item_reminder.view.*
 
-class ReminderAdapter: RecyclerView.Adapter<ReminderAdapter.ReminderViewHolder>() {
+class ReminderAdapter(val context: Context): RecyclerView.Adapter<ReminderAdapter.ReminderViewHolder>() {
 
     private var mListener: ReminderItemInteractionListener? = null
+    private var mDeleteReminderListener: OnDeleteReminderListener? = null
 
     inner class ReminderViewHolder(itemView: View): RecyclerView.ViewHolder(itemView)
 
@@ -45,6 +48,14 @@ class ReminderAdapter: RecyclerView.Adapter<ReminderAdapter.ReminderViewHolder>(
 
     fun setOnItemClickListener(listener: ReminderItemInteractionListener?) {
         mListener = listener
+    }
+
+    fun setDeleteReminderListener(deleteReminderListener: OnDeleteReminderListener) {
+        mDeleteReminderListener = deleteReminderListener
+    }
+
+    fun deleteReminder(position: Int) {
+        mDeleteReminderListener?.deleteReminder(position)
     }
 
     override fun onBindViewHolder(holder: ReminderViewHolder, position: Int) {
