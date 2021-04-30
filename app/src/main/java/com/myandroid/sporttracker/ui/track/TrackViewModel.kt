@@ -1,10 +1,7 @@
 package com.myandroid.sporttracker.ui.track
 
 import androidx.hilt.lifecycle.ViewModelInject
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.myandroid.sporttracker.db.Sport
 import com.myandroid.sporttracker.db.SportDAO_Impl
 import com.myandroid.sporttracker.repository.SportRepository

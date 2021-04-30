@@ -52,6 +52,12 @@ class TrackFragment : Fragment(), EasyPermissions.PermissionCallbacks {
         requestPermissions()
         calendarView.setOnDayClickListener(OnDayClickListener() { eventDay ->
             val clickedDayCalendar = eventDay.calendar
+            val dayAfter = clickedDayCalendar.timeInMillis + 86400000L
+            if (savedInstanceState != null) {
+                savedInstanceState.putLong("startDate", clickedDayCalendar.timeInMillis)
+                savedInstanceState.putLong("endDate", dayAfter)
+                this.arguments = savedInstanceState
+            }
             findNavController().navigate(R.id.action_nav_track_to_trackPerDayFragment)
         })
 

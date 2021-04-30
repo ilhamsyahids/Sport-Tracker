@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import com.myandroid.sporttracker.R
 import com.myandroid.sporttracker.adapters.TrackAdapter
 import dagger.hilt.android.AndroidEntryPoint
@@ -28,8 +29,6 @@ class TrackPerDayFragment : Fragment(R.layout.fragment_track_per_day_list) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
-
-        Log.println(Log.ERROR, "TRACK LIST", trackViewModel.allSport.toString())
 
         trackViewModel.allSport.observe(viewLifecycleOwner, Observer {
             trackAdapter.submitList(it)
