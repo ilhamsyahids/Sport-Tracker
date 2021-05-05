@@ -1,27 +1,25 @@
 package com.myandroid.sporttracker.ui.track
 
+import android.content.res.Configuration
 import android.os.Bundle
-import android.util.Log
-import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.myandroid.sporttracker.R
 import com.myandroid.sporttracker.adapters.TrackAdapter
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.android.synthetic.main.fragment_track_list.*
 import kotlinx.android.synthetic.main.fragment_track_per_day_list.*
+
 
 /**
  * A fragment representing a list of Items.
  */
 @AndroidEntryPoint
-class TrackPerDayFragment : Fragment(R.layout.fragment_track_per_day_list) {
+class TrackPerDayFragment : Fragment(R.layout.fragment_track_list) {
 
     private lateinit var trackAdapter: TrackAdapter
     private val trackViewModel: TrackViewModel by viewModels()
@@ -34,12 +32,25 @@ class TrackPerDayFragment : Fragment(R.layout.fragment_track_per_day_list) {
             val bundle = Bundle().apply {
                 putSerializable("sport", it)
             }
-            findNavController().navigate(R.id.action_trackPerDayFragment_to_trackDetails, bundle)
+            if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
+                //Do some stuff
+                    val details = TrackDetailsFragment()
+                val transaction = childFragmentManager.beginTransaction()
+                transaction.add(R.id.trackDetails, details.javaClass, bundle).commit()
+            }else{
+                findNavController().navigate(
+                    R.id.action_trackPerDayFragment_to_trackDetails,
+                    bundle
+                )
+            }
+
         }
 
         trackViewModel.allSport.observe(viewLifecycleOwner, Observer {
             trackAdapter.submitList(it)
         })
+
+
     }
 
     private fun setupRecyclerView() = trackPerDay.apply{
@@ -47,4 +58,5 @@ class TrackPerDayFragment : Fragment(R.layout.fragment_track_per_day_list) {
         adapter = trackAdapter
         layoutManager = LinearLayoutManager(requireContext())
     }
+
 }

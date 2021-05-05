@@ -36,7 +36,7 @@
         android:id="@+id/trackPerDayFragment"
         android:name="com.myandroid.sporttracker.ui.track.TrackPerDayFragment"
         android:label="@string/title_track"
-        tools:layout="@layout/fragment_track_per_day_list" >
+        tools:layout="@layout/fragment_track_list" >
         <action
             android:id="@+id/action_trackPerDayFragment_to_nav_track"
             app:destination="@id/nav_track" />
